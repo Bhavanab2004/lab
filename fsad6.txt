@@ -1,0 +1,190 @@
+mkdir inventory-management
+cd inventory-management
+mkdir backend
+cd backend
+npm init -y
+npm install express cors
+myinventory.js
+
+const express = require('express');
+const cors = require('cors');
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+let inventory = [
+    { id: 1, name: "prod1", qty: 12, price: 12 },
+    { id: 2, name: "prod2", qty: 1, price: 13 },
+    { id: 3, name: "prod3", qty: 10, price: 14 },
+    { id: 4, name: "prod4", qty: 19, price: 16 }
+];
+
+app.get('/', (req, res) => {
+    res.json(inventory);
+});
+
+app.post('/add', (req, res) => {
+    const { id, name, qty, price } = req.body;
+
+    if (!id || !name || qty === undefined || price === undefined) {
+        return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const invent = {
+        id: Number(id),
+        name: name,
+        qty: Number(qty),
+        price: Number(price)
+    };
+
+    inventory.push(invent);
+
+    res.json(inventory);
+});
+
+app.listen(8000, () => {
+    console.log('Express is working at http://localhost:8000');
+});
+
+node myinventory.js
+cd inventory-management
+npx create-react-app program6
+cd program6
+npm install axios
+program6 → src → App.js
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+function App() {
+    const [inventory, setInventory] = useState([]);
+
+    const [id, setId] = useState('');
+    const [name, setName] = useState('');
+    const [qty, setQty] = useState('');
+    const [price, setPrice] = useState('');
+
+    const URL = 'http://localhost:8000';
+
+    useEffect(() => {
+        fetchInventory();
+    }, []);
+
+    const fetchInventory = async () => {
+        try {
+            const response = await axios.get(URL);
+            setInventory(response.data);
+        } catch (error) {
+            console.log('Error fetching inventory:', error);
+        }
+    };
+
+    const SubmitEvent = async (e) => {
+        e.preventDefault();
+
+        const product = {
+            id: Number(id),
+            name: name,
+            qty: Number(qty),
+            price: Number(price)
+        };
+
+        try {
+            await axios.post(URL + '/add', product);
+
+            alert('Product added successfully!');
+
+            setId('');
+            setName('');
+            setQty('');
+            setPrice('');
+
+            fetchInventory();
+        } catch (error) {
+            console.log('Error adding product:', error);
+            alert('Unable to add product');
+        }
+    };
+
+    return (
+        <div>
+            <h1>Inventory Management System</h1>
+
+            <h2>Available Inventory</h2>
+
+            <table border="1" cellPadding="10">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {inventory.map((item) => (
+                        <tr key={item.id}>
+                            <td>{item.id}</td>
+                            <td>{item.name}</td>
+                            <td>{item.qty}</td>
+                            <td>{item.price}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+
+            <h2>Add New Product</h2>
+
+            <form onSubmit={SubmitEvent}>
+                <p>
+                    ID:
+                    <input
+                        type="number"
+                        value={id}
+                        onChange={(e) => setId(e.target.value)}
+                        required
+                    />
+                </p>
+
+                <p>
+                    Product Name:
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                    />
+                </p>
+
+                <p>
+                    Quantity:
+                    <input
+                        type="number"
+                        value={qty}
+                        onChange={(e) => setQty(e.target.value)}
+                        required
+                    />
+                </p>
+
+                <p>
+                    Price:
+                    <input
+                        type="number"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        required
+                    />
+                </p>
+
+                <button type="submit">Add Product</button>
+            </form>
+        </div>
+    );
+}
+
+export default App;
+
+npm start
