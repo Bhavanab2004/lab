@@ -1,3 +1,5 @@
+sudo systemctl start mongod
+mongosh
 db.employees.insertMany([
   {
     employee_id: 101,
